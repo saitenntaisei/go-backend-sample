@@ -37,7 +37,7 @@ func TestMain(m *testing.M) {
 
 	mysqlConfig := config.MySQL()
 
-	resource, err := pool.Run("mysql", "latest", []string{
+	resource, err := pool.Run("mariadb", "latest", []string{
 		"MYSQL_ROOT_PASSWORD=" + mysqlConfig.Passwd,
 		"MYSQL_DATABASE=" + mysqlConfig.DBName,
 	})
