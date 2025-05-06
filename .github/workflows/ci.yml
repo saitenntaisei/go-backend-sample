@@ -11,12 +11,12 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version-file: ./go.mod
-      - run: make mod
-      - run: make build
+      - name: Build with xc
+        run: go run github.com/joerdav/xc/cmd/xc@latest build
 
   lint:
     name: Lint
@@ -24,11 +24,11 @@ jobs:
     needs:
       - build
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version-file: ./go.mod
-      - uses: golangci/golangci-lint-action@v3
+      - uses: golangci/golangci-lint-action@v7
         with:
           version: latest
           args: --timeout=10m
@@ -39,11 +39,12 @@ jobs:
     needs:
       - build
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version-file: ./go.mod
-      - run: make test-unit
+      - name: Unit test with xc
+        run: go run github.com/joerdav/xc/cmd/xc@latest test-unit
 
   test-integration:
     name: Integration Test
@@ -51,8 +52,35 @@ jobs:
     needs:
       - build
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version-file: ./go.mod
-      - run: make test-integration
+      - name: Integration test with xc
+        run: go run github.com/joerdav/xc/cmd/xc@latest test-integration
+
+  dependabot-automerge:
+    name: Dependabot Automerge
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    needs:
+      - build
+      - lint
+      - test-unit
+      - test-integration
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    steps:
+      - name: Dependabot metadata
+        uses: dependabot/fetch-metadata@v2
+        id: metadata
+      - uses: actions/checkout@v4
+      - name: Enable automerge
+        if: |
+          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        run: |
+          gh pr merge ${{ github.event.number }} --auto --merge
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"go-backend-sample/internal/handler"
-	"go-backend-sample/internal/migration"
-	"go-backend-sample/internal/pkg/config"
-	"go-backend-sample/internal/repository"
+	"backend/internal/handler"
+	"backend/internal/migration"
+	"backend/internal/pkg/config"
+	"backend/internal/repository"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"

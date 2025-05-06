@@ -1,8 +1,8 @@
 package integration
 
 import (
+	"backend/internal/handler"
 	"encoding/json"
-	"go-backend-sample/internal/handler"
 	"testing"
 
 	"github.com/google/uuid"

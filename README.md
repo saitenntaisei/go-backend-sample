@@ -1,45 +1,101 @@
-# go-backend-sample
+# go-backend-template
+
+<a href="https://xcfile.dev"><img src="https://xcfile.dev/badge.svg" alt="xc compatible" /></a>
 
 ハッカソンなど短期間でWebアプリを開発する際のバックエンドのGo実装例です。
 学習コストと開発コストを抑えることを目的としています。
 
-## 使い方
+## プロジェクト作成方法
 
-- 最低限[Docker](https://www.docker.com/) ([Docker Compose](https://docs.docker.com/compose/))が必要です。
-- linter, formatterには[golangci-lint](https://golangci-lint.run/)を使っています。
-- 開発環境では[cosmtrek/air](https://github.com/cosmtrek/air)を使ったホットリロード開発が可能です
-- makeコマンドのターゲット一覧とその説明は`make help`で確認できます
-
-### 開発環境の実行
+GitHubの `Use this template` ボタンからレポジトリを作成するか、以下の`gonew`コマンドで作成できます。
 
 ```sh
-make dev
+go run golang.org/x/tools/cmd/gonew@latest github.com/ras0q/go-backend-template {{ project_name }}
+```
+
+※ GitHub Templateから作成した場合は別途モジュール名を変更することを推奨します。
+
+## 開発手順
+
+- 最低限[Docker](https://www.docker.com/)と[Docker Compose](https://docs.docker.com/compose/)が必要です。
+  - [Compose Watch](https://docs.docker.com/compose/file-watch/)を使うため、Docker Composeのバージョンは2.22以上にしてください。
+- linter, formatterには[golangci-lint](https://golangci-lint.run/)を使っています。
+  - VSCodeを使用する場合は`.vscode/settings.json`でlinterの設定を行ってください
+
+  ```json
+  {
+    "go.lintTool": "golangci-lint"
+  }
+  ```
+
+## Tasks
+
+開発に用いるコマンド一覧
+
+> [!TIP]
+> `xc` を使うことでこれらのコマンドを簡単に実行できます。
+> 詳細は以下のページをご覧ください。
+> - [xc](https://xcfile.dev)
+> - [MarkdownベースのGo製タスクランナー「xc」のススメ](https://zenn.dev/trap/articles/af32614c07214d)
+>
+> ```bash
+> go install github.com/joerdav/xc/cmd/xc@latest
+> ```
+
+### build
+
+アプリをビルドします。
+
+```sh
+go mod download
+go build -o ./$(basename $PWD)
+```
+
+### dev
+
+ホットリロードの開発環境を構築します。
+
+```sh
+docker compose watch
 ```
 
 API、DB、DB管理画面が起動します。
-各コンテナが起動したら、以下のURLにアクセスすることができます
+各コンテナが起動したら、以下のURLにアクセスすることができます。
+Compose Watchにより、ソースコードの変更を検知して自動で再起動します。
 
 - <http://localhost:8080/> (API)
 - <http://localhost:8081/> (DBの管理画面)
 
-### テストの実行
+### test
 
-全てのテスト
+全てのテストを実行します。
 
 ```sh
-make test
+go test -v -cover -race -shuffle=on ./...
 ```
 
-単体テストのみ
+### test-unit
+
+単体テストを実行します。
 
 ```sh
-make test-unit
+go test -v -cover -race -shuffle=on . ./internal/...
 ```
 
-結合テストのみ
+### test-integration
+
+結合テストを実行します。
 
 ```sh
-make test-integration
+go test -v -cover -race -shuffle=on ./integration/...
+```
+
+### lint
+
+Linter (golangci-lint) を実行します。
+
+```sh
+golangci-lint run --timeout=5m --fix ./...
 ```
 
 ## 構成
@@ -59,7 +115,7 @@ make test-integration
   - `migration/`: DBマイグレーション
     - DBのスキーマを定義する
     - Tips: マイグレーションツールは[pressly/goose](https://github.com/pressly/goose)を使っている
-    - 初期化スキーマは`1_schema.sql`に記述し、運用開始後のスキーマ定義変更等は`2_add_user_age.sql`ように連番を振って記述する
+    - 初期化スキーマは`1_schema.sql`に記述し、運用開始後のスキーマ定義変更等は`2_add_user_age.sql`のように連番を振って記述する
       - Tips: Goでは1.16から[embed](https://pkg.go.dev/embed)パッケージを使ってバイナリにファイルを文字列として埋め込むことができる
   - `repository/`: DBアクセス
     - DBへのアクセス処理

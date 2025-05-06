@@ -1,25 +1,26 @@
-version: '3'
+version: "3"
 
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - ./main.go:/app/main.go
-      - ./internal:/app/internal
     ports:
-      - 8080:8080
+      - "8080:8080"
     environment:
       APP_ADDR: :8080
       DB_USER: root
       DB_PASS: pass
-      DB_HOST: mysql
+      DB_HOST: db
       DB_PORT: "3306"
       DB_NAME: app
     depends_on:
-      mysql:
+      db:
         condition: service_healthy
+    develop:
+      watch:
+        - action: rebuild
+          path: ./
 
   mysql:
     image: mariadb:latest
@@ -35,15 +36,10 @@ services:
       timeout: 10s
       retries: 30
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
-    environment:
-      PMA_USER: root
-      PMA_PASSWORD: pass
-      PMA_HOST: mysql
-      PMA_PORT: 3306
+  adminer:
+    image: adminer:latest
     ports:
-      - 8081:80
+      - "8081:8080"
     depends_on:
-      mysql:
+      db:
         condition: service_healthy

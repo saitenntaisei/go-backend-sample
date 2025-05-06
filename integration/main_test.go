@@ -1,10 +1,10 @@
 package integration
 
 import (
-	"go-backend-sample/internal/handler"
-	"go-backend-sample/internal/migration"
-	"go-backend-sample/internal/pkg/config"
-	"go-backend-sample/internal/repository"
+	"backend/internal/handler"
+	"backend/internal/migration"
+	"backend/internal/pkg/config"
+	"backend/internal/repository"
 	"log"
 	"net/http/httptest"
 	"strings"
@@ -53,6 +53,7 @@ func TestMain(m *testing.M) {
 			return err
 		}
 		db = _db
+
 		return _db.Ping()
 	}); err != nil {
 		log.Fatal("connect to database container: ", err)
